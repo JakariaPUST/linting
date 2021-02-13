@@ -21,7 +21,7 @@ base_cmd='npx install-peerdeps --dev eslint-config-airbnb'
 
 # Package Manager Prompt
 echo
-echo "Which package manager are you using?"
+echo "Which package manager are you using? Enter 1 for yarn and 2 for npm"
 select package_command_choices in "Yarn" "npm" "Cancel"; do
   case $package_command_choices in
     Yarn ) pkg_cmd='yarn add'; break;;
@@ -31,16 +31,8 @@ select package_command_choices in "Yarn" "npm" "Cancel"; do
 done
 echo
 
-# File Format Prompt
-echo "Which ESLint and Prettier configuration format do you prefer?"
-select config_extension in ".js" ".json" "Cancel"; do
-  case $config_extension in
-    .js ) config_opening='module.exports = {'; break;;
-    .json ) config_opening='{'; break;;
-    Cancel ) exit;;
-  esac
-done
-echo
+# File Format
+config_opening='{';
 
 # Checks for existing eslintrc files
 if [ -f ".eslintrc.js" -o -f ".eslintrc.yaml" -o -f ".eslintrc.yml" -o -f ".eslintrc.json" -o -f ".eslintrc" ]; then
@@ -49,37 +41,18 @@ if [ -f ".eslintrc.js" -o -f ".eslintrc.yaml" -o -f ".eslintrc.yml" -o -f ".esli
   echo
   echo -e "${RED}CAUTION:${NC} there is loading priority when more than one config file is present: https://eslint.org/docs/user-guide/configuring#configuration-file-formats"
   echo
-  read -p  "Write .eslintrc${config_extension} (Y/n)? "
+  read -p  "Write .eslintrc${config_extension} (Y/n) Enter y for yes and n for no"
   if [[ $REPLY =~ ^[Nn]$ ]]; then
     echo -e "${YELLOW}>>>>> Skipping ESLint config${NC}"
     skip_eslint_setup="true"
   fi
 fi
-finished=false
 
-# Max Line Length Prompt
-while ! $finished; do
-  read -p "What max line length do you want to set for ESLint and Prettier? (Recommendation: 100)"
-  if [[ $REPLY =~ ^[0-9]{2,3}$ ]]; then
-    max_len_val=$REPLY
-    finished=true
-    echo
-  else
-    echo -e "${YELLOW}Please choose a max length of two or three digits, e.g. 80 or 100 or 120${NC}"
-  fi
-done
+# Max Line Length
+max_len_val="100"
 
 # Trailing Commas Prompt
-echo "What style of trailing commas do you want to enforce with Prettier?"
-echo -e "${YELLOW}>>>>> See https://prettier.io/docs/en/options.html#trailing-commas for more details.${NC}"
-select trailing_comma_pref in "none" "es5" "all"; do
-  case $trailing_comma_pref in
-    "none" ) break;;
-    "es5" ) break;;
-    "all" ) break;;
-  esac
-done
-echo
+trailing_comma_pref="es5"
 
 # ----------------------
 # Perform Configuration
@@ -118,7 +91,6 @@ else
 
   echo ${config_opening}'
   "extends": [
-    "react-app",
     "airbnb",
     "airbnb/hooks",
     "eslint:recommended",
@@ -139,6 +111,8 @@ else
   "rules": {
     "react-hooks/rules-of-hooks": "error",
     "no-console": 0,
+    "indent": 0,
+    "linebreak-style": 0,
     "react/state-in-constructor": 0,
     "react/prop-types": 0,
     "jsx-a11y/click-events-have-key-events": 0,
